@@ -26,7 +26,7 @@
 (define (subst v)
   (cond
    ((variable? v)
-    (let ((val (variable-get v)))
+    (let ((val (variable-value v)))
       (if (eq? val #!void) v (subst val))))
    ((pair? v)
     (cons (subst (car v))
@@ -37,7 +37,7 @@
   (let reset ((xs ms) (ys '()))
     (if (eq? xs m0) ys
         (begin
-          (variable-reset! (car xs))
+          (variable-value-set! (car xs) #!void)
           (reset (cdr xs) (cons (car xs) ys))))))
 
 (define unify
@@ -49,12 +49,12 @@
                          ((eq? a b) (cn #t mv))
                          
                          ((variable? a) ;; occur check
-                          (let((val (variable-get a)))
+                          (let((val (variable-value a)))
                             (if (eq? val #!void)
                                 (if (and oc (occur? a b))
                                     (cn #f mv)
                                     (begin
-                                      (variable-set! a b)
+                                      (variable-value-set! a b)
                                       (cn #t (cons a mv))))
                                 (unify val b mv cn))))
                          

@@ -16,32 +16,19 @@
   
   make-variable
   variable?
-  variable-get
-  variable-set!
-  variable-reset!
-  *-var-*
+  variable-value
+  variable-value-set!
   ))
 
-(define-macro (make-variable)
-  `(cons *-var-* #!void))
-
-(define-macro (variable-get v)
-  `(cdr ,v))
-
-(define-macro (variable-set! v vv)
-  `(set-cdr! ,v ,vv))
-
-(define-macro (variable-reset! v)
-  `(variable-set! ,v #!void))
-
-(define-macro (variable? v)
-  `(and (pair? ,v) (eq? (car ,v) *-var-*)))
+(define-type variable
+  id: f630f5ac-6468-401a-966d-3531639a6469
+  macros:
+  value)
 
 (define-macro+ (success) `(return #t))
 
 (define-macro+ (fail)
-  (let(
-       (mv (gensym 'mv))
+  (let((mv (gensym 'mv))
        (oc (gensym 'oc))
        (ct (gensym 'ct))
        (bt (gensym 'bt)))
@@ -51,8 +38,7 @@
   `(bind (,(gensym 'ignore) ,m) ,n))
 
 (define-macro+ (if+ t? m n)
-  (let(
-       (mv (gensym 'mv))
+  (let((mv (gensym 'mv))
        (oc (gensym 'oc))
        (ct (gensym 'ct))
        (bt (gensym 'bt))
@@ -90,7 +76,7 @@
 
 
 (define-macro+ (letenv+ vs b)
-  `(let+ ,(map (lambda (v) `(,v (make-variable))) vs)
+  `(let+ ,(map (lambda (v) `(,v (make-variable #!void))) vs)
      ,b))
 
 (define-macro+ (newvar)
@@ -99,7 +85,7 @@
        (ct (gensym 'ct))
        (bt (gensym 'bt)))
     `(reflect (,mv ,oc ,ct ,bt)
-              (,ct (make-variable) ,mv ,oc ,bt))))
+              (,ct (make-variable #!void) ,mv ,oc ,bt))))
 
 (define-macro+ (occur-check-set! v)
   (let((mv (gensym 'mv))
@@ -115,8 +101,10 @@
        (ct (gensym 'ct))
        (bt (gensym 'bt))
        (bt1 (gensym 'bt))
-       (mv1 (gensym 'mv)))
+       (mv1 (gensym 'mv))
+       (cut (gensym 'cut)))
     `(reflect (,mv ,oc ,ct ,bt)
-	      (,ct #t ,mv ,oc (lambda (,mv1) (,bt #t ,mv1))))))
+	      (,ct #t ,mv ,oc (lambda (,cut ,mv1) (,bt #t ,mv1))))))
+
 
 

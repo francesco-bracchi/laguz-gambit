@@ -5,7 +5,7 @@
 
 (define-macro+ (logic e)
   (cond
-   ((and (pair? (car e)) (eq? (car e) '^))
+   ((and (pair? (car e)) (eq? (car e) '&))
     `(logic (,cat ,@(cdr e))))
    
    ((and (pair? (car e)) (eq? (car e) 'v))

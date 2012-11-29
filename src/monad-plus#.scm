@@ -44,8 +44,7 @@
 					     ,bt)))))))
 
 (define-macro (orelse m n . x)
-  (let(
-       (mm (gensym 'm))
+  (let((mm (gensym 'm))
        (nn (gensym 'n))
        (mv (gensym 'mv))
        (oc (gensym 'oc))
@@ -70,11 +69,9 @@
 						     (,nn ,mv ,oc ,ct ,bt)))))))))))
 
 (define-macro (define-macro+ h b)
-  (let(
-       (mv (gensym 'mv))
+  (let((mv (gensym 'mv))
        (oc (gensym 'oc))
        (ct (gensym 'ct))
-       (bt (gensym 'bt)))
-    
+       (bt (gensym 'bt)))    
     `(define-macro ,(append h (list mv oc ct bt))
        (list 'with-state (list ,mv ,oc ,ct ,bt) ,b))))
