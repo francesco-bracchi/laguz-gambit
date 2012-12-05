@@ -24,12 +24,11 @@
          (bt (gensym 'bt)))
       `(run-monad (logic (cat ,@(append
                                 (map (lambda (v) `(<- ,v (newvar))) vs)
-                                (list e
-                                      `(return (list ,@(map (lambda (v) `(cons ',v (subst ,v))) vs)))))))
+                                (list e `(return (list ,@(map (lambda (v) `(cons ',v (subst ,v))) vs)))))))
                   '()
                   #f
-                  (lambda (,vv ,mv ,ot ,bt) (cons ,vv (lambda () (,bt #f ,mv))))
-                  (lambda (cut mv) '())))))
+                  (lambda (,vv ,mv ,ot ,bt) (cons ,vv (lambda () (,bt ,mv))))
+                  (lambda (mv) '())))))
 
 (define-macro+ (case-unify fs abs)
   (letrec((variable-name?
@@ -79,6 +78,7 @@
 (define-macro (case-relation a . as)
   (let((fp (map (lambda (_) (gensym 'f)) (car a))))
     `(relation ,fp (case-unify ,fp ,(cons a as)))))
+
 
 (define-macro (laguz . as)
   (let((relations

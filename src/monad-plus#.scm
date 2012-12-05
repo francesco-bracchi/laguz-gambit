@@ -53,21 +53,37 @@
        (v (gensym 'v))
        (mv1 (gensym 'mv))
        (oc1 (gensym 'oc))
-       (cut? (gensym 'cut))
        (bt1 (gensym 'bt1)))
     `(with-state ,x
                  (reify (,mm ,m)
                         (reify (,nn ,n)
                                (reflect (,mv ,oc ,ct ,bt)
-                                        (,mm ,mv ,oc
-                                             (lambda (,v ,mv1 ,oc1 ,bt1) (,ct ,v ,mv1 ,oc1 ,bt1))
-                                             (lambda (,cut? ,mv1)
-                                               (if ,cut? 
-						   (,bt #t ,mv)
-						   (begin 
-						     (reset-variables! ,mv1 ,mv)
-						     (,nn ,mv ,oc ,ct ,bt)))))))))))
+                                        (,mm ,mv ,oc ,ct
+                                             (lambda (,mv1) 
+					       (reset-variables! ,mv1 ,mv)
+					       (,nn ,mv ,oc ,ct ,bt)))))))))
 
+;; deterministic variant of 
+(define-macro (orelse! m n . x)
+  (let((mm (gensym 'm))
+       (nn (gensym 'n))
+       (mv (gensym 'mv))
+       (oc (gensym 'oc))
+       (ct (gensym 'ct))
+       (bt (gensym 'bt))
+       (v (gensym 'v))
+       (mv1 (gensym 'mv))
+       (oc1 (gensym 'oc))
+       (bt1 (gensym 'bt1)))
+    `(with-state ,x
+                 (reify (,mm ,m)
+                        (reify (,nn ,n)
+                               (reflect (,mv ,oc ,ct ,bt)
+                                        (,mm ,mv ,oc 
+                                             (lambda (,v ,mv1 ,oc1 ,bt1) (,ct ,v ,mv1 ,oc1 ,bt))
+                                             (lambda (,mv1) 
+					       (reset-variables! ,mv1 ,mv)
+					       (,nn ,mv ,oc ,ct ,bt)))))))))
 (define-macro (define-macro+ h b)
   (let((mv (gensym 'mv))
        (oc (gensym 'oc))
