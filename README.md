@@ -39,12 +39,6 @@ that's not the only way to express these, actually & (and) and v (or) operators 
 The last operator is ~ that is negation (pay attention using this) and is an unary operator.
     
 ###Cut
-cut is implemented, but I'm not sure I correctly grokked the prolog cut!, in any case cut! is an
-empty relation, used in this way:
-(:- (foo A B) (r0 A C) (cut!) (r1 C B))
-(:- (foo A B) (r2 A B))
-suppose that during execution r0 succed, cut! always succeed, but r1 fails, this means that the 
-second foo clause will never be reached.
-if r0 fails r2 will be tested.
-once execution traverse a cut point, and it backtracks back before cut!, the only thing that 
-can happen is failure.
+cut is NOT implemented. but a special or operator is implemented that can be used for deterministic
+deductions, like (sequence (orelse* X Y) Z) it behaves correctly in most cases, except when Z fails. In this
+case it doesn't backtrack to (orelse* X Y) but tries to backtrack nearer the main goal.
