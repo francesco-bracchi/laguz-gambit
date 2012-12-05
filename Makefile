@@ -35,6 +35,7 @@ clean:
 	-$(REMOVE) $(OBJECT_LINKFILE)
 	-$(REMOVE) $(LINKFILE)
 	-$(REMOVE) $(LIBDIR)
+	-$(REMOVE) $(EXAMPLEDIR)/*.o1
 
 clean-linkfile:
 	-$(REMOVE) $(CLINKFILE)
@@ -76,9 +77,9 @@ install: libdir $(INSTALLDIR)
 example: libdir $(EXAMPLEDIR)/laguz-test.o1
 	@echo "testing laguz"
 	@echo
-	$(GSI) -:~~$(LIBNAME)=$(LIBDIR),m32000 $(LIBDIR)/$(LIBNAME) $(EXAMPLEDIR)/laguz-test
+	$(GSI) -:~~$(LIBNAME)=$(LIBDIR),m128000 $(LIBDIR)/$(LIBNAME) $(EXAMPLEDIR)/laguz-test
 
 repl: libdir
 	@echo "REPL with laguz"
 	@echo
-	$(GSI) -:~~$(LIBNAME)=$(SRCDIR) $(SRCDIR)/kernel.scm -
+	$(GSI) -:~~$(LIBNAME)=$(SRCDIR) $(LIBDIR)/laguz -
