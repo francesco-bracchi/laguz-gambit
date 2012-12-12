@@ -64,7 +64,7 @@
   (let reset ((xs ms) (ys '()))
     (if (eq? xs m0) ys
         (begin
-          (variable-value-set! (car xs) #!void)
+          ;#(variable-value-set! (car xs) #!void)
           (reset (cdr xs) (cons (car xs) ys))))))
 
 (define (unify-generic a b vars oc ct bt)

@@ -56,37 +56,57 @@
               ((pair? x)
                (list 'cons (simple->quasiquoted (car x)) (simple->quasiquoted (cdr x))))
               (else x)))))
-    
-    `(logic (alt ,@(map (lambda (ab)
-                         (let((as (car ab))
-                              (bd (if (null? (cdr ab)) '((return 'ok)) (cdr ab)))
-                               (vs '()))
-                           `(cat ,@(append
-                                   (apply append
-                                          (map (lambda (f a)
-                                                 (let*((va (variables a vs)))
-                                                   (set! vs (append vs va))
-                                                   (append
-                                                    (map (lambda (v) `(<- ,v (newvar))) va)
-                                                    `((unify ,f ,(simple->quasiquoted a))))))
-					       fs as))
-                                   (let((vb (variables bd vs)))
-                                     (map (lambda (v) `(<- ,v (newvar))) vb))
-                                   bd))))
-                       abs)))))
+    `(logic ,(let case ((abs abs))
+			(let* ((ab (car abs))
+			       (det (eq? (car ab) '!))
+			       (ab (if det (cdr ab) ab))
+			       (as (car ab))
+			       (bd (if (null? (cdr ab)) '() (cdr ab)))
+			       (vs '()))
+			  `(,(if det 'alt! 'alt)
+			    (cat ,@(append
+				    (apply append
+					   (map (lambda (f a)
+						  (let*((va (variables a vs)))
+						    (set! vs (append vs va))
+						    (append
+						     (map (lambda (v) `(<- ,v (newvar))) va)
+						     `((unify ,f ,(simple->quasiquoted a))))))
+						fs as))
+				    (let((vb (variables bd vs)))
+				      (map (lambda (v) `(<- ,v (newvar))) vb))
+				    bd))
+			    ,@(if (null? (cdr abs)) '() (list (case (cdr abs))))))))))
+
+    ;; `(logic (alt ,@(map (lambda (ab)
+    ;;                      (let((as (car ab))
+    ;;                           (bd (if (null? (cdr ab)) '() (cdr ab)))
+    ;; 			      (vs '()))
+    ;;                        `(cat ,@(append
+    ;;                                (apply append
+    ;;                                       (map (lambda (f a)
+    ;;                                              (let*((va (variables a vs)))
+    ;;                                                (set! vs (append vs va))
+    ;;                                                (append
+    ;;                                                 (map (lambda (v) `(<- ,v (newvar))) va)
+    ;;                                                 `((unify ,f ,(simple->quasiquoted a))))))
+    ;; 					       fs as))
+    ;;                                (let((vb (variables bd vs)))
+    ;;                                  (map (lambda (v) `(<- ,v (newvar))) vb))
+    ;;                                bd))))
+    ;;                    abs)))))
 
 (define-macro (case-relation a . as)
-  (let((fp (map (lambda (_) (gensym 'f)) (car a))))
+  (let ((fp (map (lambda (_) (gensym 'f)) (if (eq? (car a) '!) (cadr a) (car a)))))
     `(relation ,fp (case-unify ,fp ,(cons a as)))))
-
 
 (define-macro (laguz . as)
   (let((relations
         (let rels ((as as) (rs '()))
           (cond
            ((null? as) (reverse rs))
-           ((not (eq? (caar as) ':-))
-            (error "every laguz row should start with :-"))
+	   ((not (memq (caar as) '(:- !-)))
+            (error "every laguz row should start with :- or !-"))
            ((not (memq (car (cadr (car as))) rs))
             (rels (cdr as) (cons (car (cadr (car as))) rs)))
            (else
@@ -98,10 +118,12 @@
                              (cond
                               ((null? as) (reverse rs))
                               ((eq? (car (cadr (car as))) rel)
-                               (let*((a (car as))
-                                     (pt (cdr (cadr a)))
-                                     (bd (cddr a))) 
-                                 (filter (cdr as) (cons (cons pt bd) rs))))
+                               (let* ((a (car as))
+                                      (pt (cdr (cadr a)))
+                                      (bd (cddr a))
+				      (deterministic (eq? (car a) '!-))
+				      (line (if deterministic `(! ,pt ,@bd) (cons pt bd))))
+                                 (filter (cdr as) (cons line rs))))
                               (else
                                (filter (cdr as) rs)))))))))
     `(begin ,@(map make-case-relation relations))))

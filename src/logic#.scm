@@ -5,23 +5,14 @@
 
 (define-macro+ (logic e)
   (cond
-   ((and (pair? (car e)) (eq? (car e) 'et))
+   ((and (pair? e) (eq? (car e) 'et))
     `(logic (cat ,@(cdr e))))
    
-   ((and (pair? (car e)) (eq? (car e) 'vel))
+   ((and (pair? e) (eq? (car e) 'vel))
     `(logic (alt ,@(cdr e))))
 
-   ((and (pair? (car e)) (eq? (car e) 'vel!))
+   ((and (pair? e) (eq? (car e) 'vel!))
     `(logic (alt! ,@(cdr e))))
-
-   ((equal? e '(cat))
-    `(success))
-
-   ((equal? e '(alt))
-    `(fail))
-
-   ((equal? e '(alt!))
-    '(fail))
 
    ((and (pair? e) (eq? (car e) 'cat) (null? (cddr e)))
     `(logic ,(cadr e)))
@@ -61,6 +52,15 @@
       
    ((and (pair? e) (eq? (car e) 'letrec))
     `(letrec+ ,(cadr e) (logic (cat ,@(cddr e)))))
+
+   ((equal? e '(cat))
+    `(success))
+
+   ((equal? e '(alt))
+    `(fail))
+
+   ((equal? e '(alt!))
+    '(fail))
    
    (else e)))
 
