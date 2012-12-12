@@ -38,7 +38,33 @@
  (:- (father-child 'c 'd))
  
  (:- (ancestor A B) (father-child A X) (ancestor X B))
- (:- (ancestor A B) (father-child A B)))
+ (:- (ancestor A B) (father-child A B))
+
+ )
+
+;; hand written relation list-reverse 
+
+(define-relation (list-reverse-1 a b)
+  (cat (<- A (newvar))
+       (unify A a)
+       (<- B (newvar))
+       (unify B b)
+       (list-reverse-1-aux A B '())))
+
+
+(define-relation (list-reverse-1-aux a b c)
+  (vel (cat (unify a '())
+	     (<- As (newvar))
+	     (unify b As)
+	     (unify c As))
+	(cat (<- A (newvar))
+	     (<- As (newvar))
+	     (unify a (cons A As))
+	     (<- Bs (newvar))
+	     (unify b Bs)
+	     (<- Cs (newvar))
+	     (unify c Cs)
+	     (list-reverse-1-aux As Bs (cons A Cs)))))
 
 (define (to-list r)
   (if (null? r) '()
@@ -54,7 +80,12 @@
   `(_times ,n (lambda () ,@e)))
 
 (define test-list
-  (string->list "this is not a simple random sequence of characters that will be transformed in a list and then inverted except the last"))
+  (string->list 
+   (string-append 
+    "this is not a simple random sequence of characters that will be transformed in a list and then inverted except the last"
+    "this is not a simple random sequence of characters that will be transformed in a list and then inverted except the last"
+    "this is not a simple random sequence of characters that will be transformed in a list and then inverted except the last"
+    "this is not a simple random sequence of characters that will be transformed in a list and then inverted except the last")))
 
 (define (->string e)
   (cond
@@ -70,10 +101,14 @@
 
 (define-macro (test-reverting relation)
   `(begin (pp '(testing ,relation))
-	  (time (show-results (times 1000 (to-list (?- (cat (,relation test-list (cons X XS))
-							    (laguz-length XS L)))))))))
+	  (time (show-results (times 300 (to-list (?- (,relation test-list (cons X XS)))))))))
 
-; (test-reverting list-reverse-naive)
+(display "Testing naive list-reverse")
+(test-reverting list-reverse-naive)
+
+;(test-reverting list-reverse-naive)
+(display "Testing hand written relation\n")
+(test-reverting list-reverse-1)
+
+(display "Testing horn encoded relation\n")
 (test-reverting list-reverse)
-
-;; (show-results (to-list (?- (list-reverse test-list (cons X XS)))))
